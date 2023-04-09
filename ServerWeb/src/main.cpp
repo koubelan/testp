@@ -13,7 +13,6 @@
 #include <MPU6050.h>             // Librairie du capteur GY-521
 #include <WiFi.h>               // Librairie pour se connecter à un point d'accès
 #include <ESPAsyncWebServer.h> // Librairie activer le serveur web de ESP32
-#include <AsyncTCP.h>         // Librairie de dépendance du serveur Web
 
 
 // Insertion des identifiants du Point d'accès
@@ -31,7 +30,6 @@
   int inclinaison_y = 0;
   int inclinaison_z = 0;
   int orientation = 0;
-  
 
 
 void setup() {
@@ -51,7 +49,30 @@ void setup() {
   }
   Serial.println("Connecté au réseau Wi-Fi");
 
-    
+// Méthode de définition de route et de gestion des requêtes HTTP
+  server.on("/data.json", HTTP_GET, [](AsyncWebServerRequest *request) {
+  String jsonResponse = "{";
+  jsonResponse += "\"inclinaison-x\":" + String(inclinaison_x) + ",";
+  jsonResponse += "\"inclinaison-y\":" + String(inclinaison_y) + ",";
+  jsonResponse += "\"inclinaison-z\":" + String(inclinaison_z) + ",";
+  jsonResponse += "\"orientation\":" + String(orientation);
+  jsonResponse += "}";
+
+// Réponse HTTP envoyé au client
+  AsyncWebServerResponse *response = request->beginResponse(200, "application/json", jsonResponse);
+  response->addHeader("Access-Control-Allow-Origin", "*"); // Ajout d'en-tête CORS
+  response->addHeader("Access-Control-Allow-Methods", "GET");
+  request->send(response);
+  });
+
+ // Route pour changer la couleur d'arrière plan de la page web 
+  server.on("/color", HTTP_GET, [](AsyncWebServerRequest *request){
+  String jsonResponse = "{\"color\":\"" + backgroundColor + "\"}";
+  AsyncWebServerResponse *response = request->beginResponse(200, "application/json", jsonResponse);
+  response->addHeader("Access-Control-Allow-Origin", "*"); 
+  request->send(response);
+});
+  
 // Démarrage du serveur Web
   server.begin();
   Serial.println(WiFi.localIP()); // Affichage de l'addresse ip de l'esp32
