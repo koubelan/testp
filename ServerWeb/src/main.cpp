@@ -12,6 +12,8 @@
 #include <Wire.h>                 // Librairie de communication I2C
 #include <MPU6050.h>             // Librairie du capteur GY-521
 #include <WiFi.h>               // Librairie pour se connecter à un point d'accès
+#include <ESPAsyncWebServer.h> // Librairie activer le serveur web de ESP32
+#include <AsyncTCP.h>         // Librairie de dépendance du serveur Web
 
 
 // Insertion des identifiants du Point d'accès
@@ -21,7 +23,8 @@
 // Création d'un objet du capteur MPU-6050 à partir de la classe
   MPU6050 mpu;
 
-
+// Création d'un objet du serveur web asynchrone à partir de la classe
+  AsyncWebServer server(80);
 
 // Variables pour stocker les données d'inclinaison et d'orientation
   int inclinaison_x = 0;
@@ -29,7 +32,6 @@
   int inclinaison_z = 0;
   int orientation = 0;
   
-
 
 
 void setup() {
@@ -49,6 +51,12 @@ void setup() {
   }
   Serial.println("Connecté au réseau Wi-Fi");
 
+    
+// Démarrage du serveur Web
+  server.begin();
+  Serial.println(WiFi.localIP()); // Affichage de l'addresse ip de l'esp32
+ 
+}
 
 void loop() {
 
@@ -66,6 +74,6 @@ void loop() {
 // Calcule de l'orientation à partir des données du capteur 
   orientation = (int)(atan2(gy, gz) * 180 / PI);
   
-// Ajout d'un délai pour éviter de surcharger le capteur
+// Ajout d'un délai pour éviter de surcharger le serveur et le capteur
   delay(1000);
 }
