@@ -13,7 +13,8 @@
 #include <MPU6050.h>             // Librairie du capteur GY-521
 #include <WiFi.h>               // Librairie pour se connecter à un point d'accès
 #include <ESPAsyncWebServer.h> // Librairie activer le serveur web de ESP32
-
+#include <AsyncTCP.h>         // Librairie de dépendance du serveur Web
+#include <AsyncElegantOTA.h> // Librairie de serveur ElegantOTA
 
 // Insertion des identifiants du Point d'accès
   const char* ssid = "122dumaresq";
@@ -30,6 +31,7 @@
   int inclinaison_y = 0;
   int inclinaison_z = 0;
   int orientation = 0;
+  
 
 
 void setup() {
@@ -72,7 +74,9 @@ void setup() {
   response->addHeader("Access-Control-Allow-Origin", "*"); 
   request->send(response);
 });
-  
+
+// Démarrage du serveur EleganOTA
+  AsyncElegantOTA.begin(&server);    
 // Démarrage du serveur Web
   server.begin();
   Serial.println(WiFi.localIP()); // Affichage de l'addresse ip de l'esp32
